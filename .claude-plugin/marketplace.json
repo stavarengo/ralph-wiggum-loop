@@ -7,7 +7,10 @@
   "plugins": [
     {
       "name": "ralph",
-      "source": ".",
+      "source": {
+        "source": "github",
+        "repo": "stavarengo/ralph-wiggum-loop"
+      },
       "description": "Autonomous software development plugin implementing Geoffrey Huntley's Ralph Wiggum technique - fresh context per iteration, one task at a time",
       "version": "1.0.0"
     }
