@@ -1,0 +1,15 @@
+{
+  "name": "ralph-marketplace",
+  "owner": {
+    "name": "Rafael Stavarengo",
+    "email": "faelsta@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "ralph",
+      "source": ".",
+      "description": "Autonomous software development plugin implementing Geoffrey Huntley's Ralph Wiggum technique - fresh context per iteration, one task at a time",
+      "version": "1.0.0"
+    }
+  ]
+}
