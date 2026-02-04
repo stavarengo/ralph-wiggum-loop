@@ -1,0 +1,33 @@
+# Fix Plan
+
+This file tracks the tasks Ralph needs to complete. Ralph updates this file after each iteration.
+
+## Instructions
+
+**For Ralph:**
+- Work on tasks in order from top to bottom (most important first)
+- After completing a task, move it from "Tasks" to "Completed" with a checkmark
+- If blocked, move the task to "Blocked/Issues" with a description
+- When all tasks are complete, write `RALPH_COMPLETE` at the top of this file
+- Keep this file updated after every iteration
+
+**Priority:** Tasks are ordered by importance. Complete them in the order listed.
+
+## Tasks
+
+- [ ] Example task 1: Fix the authentication bug
+- [ ] Example task 2: Add user profile endpoint
+- [ ] Example task 3: Write integration tests
+
+## Completed
+
+- [x] Example completed task: Set up project structure
+
+## Blocked/Issues
+
+None currently.
+
+**Note:** If you encounter blockers, document them here with:
+- What's blocked
+- Why it's blocked
+- What's needed to unblock it

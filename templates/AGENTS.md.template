@@ -1,0 +1,64 @@
+# Project Build & Test Instructions
+
+This file contains instructions for building and testing the project. Ralph reads this file at the start of each iteration and updates it with learnings.
+
+## How to Build
+
+Add your build commands here. Examples:
+
+```bash
+npm install
+npm run build
+```
+
+Or:
+
+```bash
+make build
+```
+
+Or:
+
+```bash
+# No build step required
+```
+
+## How to Test
+
+Add your test commands here. Examples:
+
+```bash
+npm test
+```
+
+Or:
+
+```bash
+pytest tests/
+```
+
+Or:
+
+```bash
+make test
+```
+
+Or:
+
+```bash
+./run-tests.sh
+```
+
+## Learnings
+
+**For Ralph:** Add learnings here as you discover patterns, gotchas, or useful context during iterations.
+
+Examples of good learnings:
+- When modifying X, also update Y to keep them in sync
+- Tests require the dev server running on port 3000
+- Use `npm run dev` instead of `npm start` for development
+- The database must be migrated before tests: `npm run migrate`
+
+**Current learnings:**
+
+(Ralph will add learnings here as work progresses)

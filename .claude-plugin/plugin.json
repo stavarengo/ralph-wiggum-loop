@@ -1,0 +1,8 @@
+{
+  "name": "ralph",
+  "description": "Autonomous software development plugin implementing Geoffrey Huntley's Ralph Wiggum technique using Claude Code native features",
+  "author": {
+    "name": "Rafael Stavarengo",
+    "email": "faelsta@gmail.com"
+  }
+}
