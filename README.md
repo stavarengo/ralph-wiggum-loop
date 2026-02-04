@@ -36,11 +36,16 @@ Phase 1 provides immediate value while validating the core technique. Phase 2 wi
 
 ## Installation
 
-Ralph is a Claude Code plugin. To use it:
+```bash
+# Add the marketplace
+/plugin marketplace add stavarengo/ralph-wiggum-loop
 
-1. Clone or symlink this plugin directory into your `.claude/plugins/` directory
-2. Restart Claude Code to load the plugin
-3. Run `/ralph:init` in any project to get started
+# Install Ralph
+/plugin install ralph@ralph-marketplace
+
+# Initialize in your project
+/ralph:init
+```
 
 ## Quick Start
 
