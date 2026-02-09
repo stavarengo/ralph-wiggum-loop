@@ -48,18 +48,22 @@ Remove any existing stop signal from a previous run:
 rm -f docs/ai/ralph/.ralph_stop
 ```
 
-### 3. Update status.json to 'running'
+### 3. Update status.json to 'running' and record base commit
 
-Mark Ralph as running and record the start time:
+Mark Ralph as running, record the start time, and save the current HEAD as the base commit for squashing on completion:
 
 ```bash
-# Update status.json with started_at timestamp and running status
-jq '.status = "running" | .started_at = now | .last_updated = now' \
-  docs/ai/ralph/status.json > /tmp/status.json.tmp
+# Update status.json with started_at timestamp, running status, and base commit
+jq --arg bc "$(git rev-parse HEAD)" \
+   '.status = "running" | .started_at = now | .last_updated = now | .base_commit = $bc' \
+   docs/ai/ralph/status.json > /tmp/status.json.tmp
 mv /tmp/status.json.tmp docs/ai/ralph/status.json
 
 echo "Ralph started. Beginning autonomous iteration loop..."
+echo "Base commit recorded: $(git rev-parse --short HEAD)"
 ```
+
+The `base_commit` is the anchor point used to squash all of Ralph's commits into one when all tasks complete. It is only set once per `/ralph:start` invocation — if the loop is stopped and restarted, a new base commit is recorded.
 
 ### 4. Enter Main Loop
 
@@ -111,18 +115,50 @@ while true; do
     echo ""
     echo "RALPH_COMPLETE signal detected. All tasks complete!"
 
+    FINAL_ITERATION=$(jq -r '.iteration_count' docs/ai/ralph/status.json)
+
+    # --- Squash all Ralph commits into one ---
+    BASE_COMMIT=$(jq -r '.base_commit // empty' docs/ai/ralph/status.json)
+
+    if [[ -z "$BASE_COMMIT" ]]; then
+      echo ""
+      echo "WARNING: No base_commit found in status.json. Cannot squash automatically."
+      # Use AskUserQuestion to ask:
+      #   "No base commit was recorded. Provide a commit hash to squash from, or choose 'Skip squash'."
+      # If user provides a hash, use it as BASE_COMMIT.
+      # If user chooses "Skip squash", skip the squash step.
+    else
+      echo "Squashing commits from base $BASE_COMMIT to HEAD..."
+
+      # Derive a commit message from the first heading in fix_plan.md, or fall back to generic
+      PLAN_TITLE=$(head -5 docs/ai/ralph/fix_plan.md | grep "^#" | head -1 | sed 's/^#\+ *//')
+      if [[ -z "$PLAN_TITLE" ]]; then
+        PLAN_TITLE="Ralph autonomous implementation"
+      fi
+
+      git reset --soft "$BASE_COMMIT"
+      git add .
+      git commit -m "feat: ${PLAN_TITLE}
+
+Squashed from ${FINAL_ITERATION} Ralph iterations.
+
+Co-Authored-By: Ralph Wiggum <ralph@claude-code>"
+
+      echo "All commits squashed into one: $(git rev-parse --short HEAD)"
+    fi
+
     # Update status to complete
     jq '.status = "complete" | .last_updated = now | .completed_at = now' \
       docs/ai/ralph/status.json > /tmp/status.json.tmp
     mv /tmp/status.json.tmp docs/ai/ralph/status.json
 
     # Report summary
-    FINAL_ITERATION=$(jq -r '.iteration_count' docs/ai/ralph/status.json)
     echo ""
     echo "Ralph completed successfully!"
     echo "- Total iterations: $FINAL_ITERATION"
     echo "- Status: complete"
     echo "- All tasks in fix_plan.md have been completed."
+    echo "- All commits squashed into a single commit."
     break
   fi
 
@@ -172,9 +208,14 @@ done
 - This prevents runaway loops and gives user control points
 
 **Completion signals:**
-- `RALPH_COMPLETE` at top of `fix_plan.md` = all tasks done successfully
+- `RALPH_COMPLETE` at top of `fix_plan.md` = all tasks done successfully → triggers commit squash
 - `RALPH_BLOCKED: [reason]` = cannot proceed, need user intervention
 - Empty `fix_plan.md` Tasks section = treated same as `RALPH_COMPLETE`
+
+**Commit squashing:**
+- On `RALPH_COMPLETE`, all commits since `base_commit` (recorded in status.json at start) are squashed into a single commit via `git reset --soft <base_commit> && git add . && git commit`
+- If `base_commit` is missing from status.json (e.g., older runs), the user is prompted via `AskUserQuestion` to provide a hash or skip the squash
+- The squash commit message is derived from the first heading in `fix_plan.md`
 
 ## Coordination with /ralph:stop
 
@@ -190,6 +231,7 @@ The `/ralph:stop` skill creates a `.ralph_stop` signal file. This loop checks fo
 User: /ralph:start
 
 Ralph started. Beginning autonomous iteration loop...
+Base commit recorded: a1b2c3d
 
 =========================================
 Starting iteration 1
@@ -210,11 +252,14 @@ Iteration 2: Implemented task "Add password reset flow"
 - Next: RALPH_COMPLETE
 
 RALPH_COMPLETE signal detected. All tasks complete!
+Squashing commits from base a1b2c3d to HEAD...
+All commits squashed into one: f4e5d6c
 
 Ralph completed successfully!
 - Total iterations: 2
 - Status: complete
 - All tasks in fix_plan.md have been completed.
+- All commits squashed into a single commit.
 ```
 
 ## Important Notes
