@@ -63,23 +63,40 @@ Use Task tool with subagent_type="ralph-oracle" and provide:
 - Check test files to understand expected behavior
 - Spawn parallel subagents for large search operations (up to 100)
 
-### Step 3: Implement Solution
-- Write clean, simple code following existing patterns
-- No placeholders or TODOs - complete implementations only
-- Make minimal changes focused on current task
-- Follow codebase conventions discovered in Step 2
+### Step 3: Write a Failing Test (RED)
+- Write a test that expresses the behavior you want to implement
+- Prefer end-to-end tests (e.g., Playwright) for user-visible behavior
+- If E2E is not possible, write the closest integration or unit test
+- If a relevant test already exists, update it to cover the new behavior
+- Run the test and confirm it **fails for the expected reason**
+- If it fails for an unrelated reason, fix that first
 
-### Step 4: Test
-- Run build command from AGENTS.md
-- Run test command from AGENTS.md
-- Fix any failures immediately
-- Verify implementation works end-to-end
+### Step 4: Implement and Pass (GREEN → REFACTOR)
+- Write the **minimal code** to make the failing test pass
+- No placeholders or TODOs - complete implementations only
+- Follow codebase conventions discovered in Step 2
+- Run build and test commands from AGENTS.md
+- Confirm the test passes (GREEN)
+- Refactor only while tests are green
+- If the task needs multiple behaviors, repeat Steps 3-4 for each one
+
+### Step 4b: Browser Verification (Frontend Tasks Only)
+- If the task changes UI or user-visible behavior, verify it works in a browser
+- Use Playwright to open the relevant page and confirm the changes render correctly
+- A frontend task is NOT complete until browser verification passes
+- Skip this step for backend-only, config, or non-UI tasks
 
 ### Step 5: Document Learnings
 - Append discoveries to "Learnings" section in AGENTS.md
-- Include: patterns discovered, gotchas encountered, useful context
-- Keep entries concise and actionable for future iterations
 - Update build/test commands if they changed
+- **Before writing each learning, ask:** "Would this help me work faster with zero memory of this session?"
+  - Yes → write it
+  - No → skip it
+  - Unsure → skip it
+- Good learnings: gotchas, workarounds, non-obvious patterns
+- Bad learnings: metrics, summaries, decision justifications
+- No learnings worth recording? Write "No significant learnings."
+- **Consolidate reusable patterns:** If you discover a general, reusable pattern (not task-specific), add it to a `## Codebase Patterns` section at the **top** of AGENTS.md (create it if it doesn't exist). This section is read first by future iterations and should contain only patterns that apply across tasks (e.g., "Use `sql` template tag for all DB queries", "Always use `IF NOT EXISTS` for migrations").
 
 ### Step 6: Update Tracking
 - Move completed task from "Tasks" to "Completed" section in fix_plan.md
@@ -88,6 +105,8 @@ Use Task tool with subagent_type="ralph-oracle" and provide:
 - If task revealed new sub-tasks, add them to "Tasks" section with priority
 
 ### Step 7: Commit
+- Run ALL quality checks before committing (typecheck, lint, tests from AGENTS.md)
+- Do NOT commit if any check fails — fix first
 - Create git commit with clear message describing what was done
 - Include: `Co-Authored-By: Ralph Wiggum <ralph@claude-code>`
 - Use conventional commits format: `feat:`, `fix:`, `refactor:`, etc.
@@ -129,3 +148,18 @@ Iteration N: [What was done]
 - Commit frequently - every completed task gets a commit
 - Stay focused - one task per iteration, future Ralph will handle the rest
 - Trust the process - simplicity and consistency win over complexity
+
+## Anti-Rationalization Rules (CRITICAL)
+
+These thoughts mean you MUST STOP and return your summary immediately. You are rationalizing:
+
+| If you're thinking...                            | Reality                                              |
+| ------------------------------------------------ | ---------------------------------------------------- |
+| "I should fix this other task while I'm here"    | NO. One task per iteration. Return your summary.     |
+| "This task depends on the next one"              | NO. Tasks are independent. Document the blocker.     |
+| "It's more efficient to do them together"        | NO. Efficiency is not your concern. One task only.   |
+| "The user would want me to continue"             | NO. The user wants one task per iteration. STOP.     |
+| "I can see the fix is simple"                    | NO. Simple fixes are still different tasks. STOP.    |
+| "The build fails so I need to do the next task"  | NO. Document in Blocked/Issues. STOP.                |
+
+**What IS allowed:** You MAY fix lint/typecheck/build errors in files you already modified for the current task. You may NOT implement work that belongs to a different task in fix_plan.md.
